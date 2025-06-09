@@ -31,17 +31,17 @@ jobs:
     
     - name: Run scraper
       env:
-        # Email configuration
-        EMAIL_ENABLED: ${{ secrets.EMAIL_ENABLED }}
-        EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-        EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
-        EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-        EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
-        EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+        # Environment Variables (Non-sensitive configuration)
+        EMAIL_ENABLED: ${{ vars.EMAIL_ENABLED }}
+        EMAIL_SENDER: ${{ vars.EMAIL_SENDER }}
+        EMAIL_RECIPIENT: ${{ vars.EMAIL_RECIPIENT }}
+        EMAIL_SMTP_SERVER: ${{ vars.EMAIL_SMTP_SERVER }}
+        EMAIL_SMTP_PORT: ${{ vars.EMAIL_SMTP_PORT }}
+        WHATSAPP_ENABLED: ${{ vars.WHATSAPP_ENABLED }}
+        WHATSAPP_PHONE_NUMBER: ${{ vars.WHATSAPP_PHONE_NUMBER }}
         
-        # WhatsApp configuration
-        WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
-        WHATSAPP_PHONE_NUMBER: ${{ secrets.WHATSAPP_PHONE_NUMBER }}
+        # Secrets (Sensitive credentials)
+        EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
         TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
         TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
         

@@ -32,18 +32,23 @@ CONFIG = {
     },
     "notification_settings": {
         "whatsapp": {
+            # Environment Variables (Non-sensitive configuration)
             "enabled": os.getenv('WHATSAPP_ENABLED', 'True').lower() == 'true',
             "phone_number": os.getenv('WHATSAPP_PHONE_NUMBER', '+972XXXXXXXXX')
         },
         "email": {
+            # Environment Variables (Non-sensitive configuration)
             "enabled": os.getenv('EMAIL_ENABLED', 'True').lower() == 'true',
             "smtp_server": os.getenv('EMAIL_SMTP_SERVER', 'smtp.gmail.com'),
             "smtp_port": int(os.getenv('EMAIL_SMTP_PORT', '587')),
             "sender_email": os.getenv('EMAIL_SENDER', 'your_email@gmail.com'),
+            "recipient_email": os.getenv('EMAIL_RECIPIENT', 'recipient@gmail.com'),
+            
+            # SECRETS (Sensitive credentials - should be managed securely)
             "sender_password": os.getenv('EMAIL_APP_PASSWORD', 'your_app_password'),
-            "recipient_email": os.getenv('EMAIL_RECIPIENT', 'recipient@gmail.com')
         },
         "twilio": {
+            # SECRETS (Sensitive credentials - should be managed securely)
             "account_sid": os.getenv('TWILIO_ACCOUNT_SID', 'your_twilio_account_sid'),
             "auth_token": os.getenv('TWILIO_AUTH_TOKEN', 'your_twilio_auth_token')
         }
