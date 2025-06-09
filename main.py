@@ -360,17 +360,46 @@ class Yad2CarScraper:
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--disable-web-security")
+        chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
         # Add user agent to look more human
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
         
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-        
-        return driver
+        try:
+            # Try to use ChromeDriverManager with better error handling
+            driver_path = ChromeDriverManager().install()
+            print(f"🔧 ChromeDriver installed at: {driver_path}")
+            
+            # Verify the driver path exists and is executable
+            import os
+            if not os.path.exists(driver_path):
+                raise Exception(f"ChromeDriver not found at {driver_path}")
+                
+            service = Service(driver_path)
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            
+            return driver
+            
+        except Exception as e:
+            print(f"❌ ChromeDriverManager failed: {e}")
+            print("🔧 Trying alternative approach...")
+            
+            # Fallback: try to use system Chrome with manual path detection
+            try:
+                # For GitHub Actions Ubuntu
+                chrome_options.binary_location = "/usr/bin/google-chrome"
+                service = Service()  # Let it try to find chromedriver in PATH
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+                driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                print("✅ Using system Chrome successfully")
+                return driver
+            except Exception as fallback_error:
+                print(f"❌ Fallback also failed: {fallback_error}")
+                raise Exception("Failed to setup ChromeDriver with both approaches")
     
     def build_search_url(self):
         """Build Yad2 search URL based on configuration with proper parameter mapping"""
