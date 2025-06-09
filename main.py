@@ -6,6 +6,7 @@ Sends WhatsApp notifications when new cars matching your criteria are found
 
 import json
 import time
+import os
 
 import requests
 import smtplib
@@ -48,9 +49,14 @@ class Yad2CarScraper:
     def setup_twilio(self):
         """Setup Twilio WhatsApp client"""
         try:
-            # You'll need to set these environment variables or add them to config
-            account_sid = "your_twilio_account_sid"  # Replace with your Twilio Account SID
-            auth_token = "your_twilio_auth_token"   # Replace with your Twilio Auth Token
+            # Read from config (which gets from environment variables)
+            twilio_config = self.config.get('notification_settings', {}).get('twilio', {})
+            account_sid = twilio_config.get('account_sid', 'your_twilio_account_sid')
+            auth_token = twilio_config.get('auth_token', 'your_twilio_auth_token')
+            
+            if account_sid == "your_twilio_account_sid" or auth_token == "your_twilio_auth_token":
+                print("⚠️ Twilio credentials not set - WhatsApp notifications disabled")
+                return
             
             self.twilio_client = Client(account_sid, auth_token)
             print("✅ Twilio WhatsApp client initialized")

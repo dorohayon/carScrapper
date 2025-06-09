@@ -3,6 +3,7 @@
 Configuration file using constants from yad2_mappings
 """
 
+import os
 from yad2_mappings import (
     PEUGEOT_3008, FORD_FOCUS, SUZUKI_CROSSOVER,
     AUTOMATIC, GASOLINE
@@ -31,16 +32,20 @@ CONFIG = {
     },
     "notification_settings": {
         "whatsapp": {
-            "enabled": True,
-            "phone_number": "+972XXXXXXXXX"
+            "enabled": os.getenv('WHATSAPP_ENABLED', 'True').lower() == 'true',
+            "phone_number": os.getenv('WHATSAPP_PHONE_NUMBER', '+972XXXXXXXXX')
         },
         "email": {
-            "enabled": True,
-            "smtp_server": "smtp.gmail.com",
-            "smtp_port": 587,
-            "sender_email": "dornir9@gmail.com",
-            "sender_password": "nyxpjtjbeltalhob",
-            "recipient_email": "dornir9@gmail.com"
+            "enabled": os.getenv('EMAIL_ENABLED', 'True').lower() == 'true',
+            "smtp_server": os.getenv('EMAIL_SMTP_SERVER', 'smtp.gmail.com'),
+            "smtp_port": int(os.getenv('EMAIL_SMTP_PORT', '587')),
+            "sender_email": os.getenv('EMAIL_SENDER', 'your_email@gmail.com'),
+            "sender_password": os.getenv('EMAIL_APP_PASSWORD', 'your_app_password'),
+            "recipient_email": os.getenv('EMAIL_RECIPIENT', 'recipient@gmail.com')
+        },
+        "twilio": {
+            "account_sid": os.getenv('TWILIO_ACCOUNT_SID', 'your_twilio_account_sid'),
+            "auth_token": os.getenv('TWILIO_AUTH_TOKEN', 'your_twilio_auth_token')
         }
     },
     "scraping_settings": {
