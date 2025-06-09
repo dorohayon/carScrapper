@@ -5,7 +5,7 @@ Configuration file using constants from yad2_mappings
 
 import os
 from yad2_mappings import (
-    PEUGEOT_3008, FORD_FOCUS, SUZUKI_CROSSOVER,
+    PEUGEOT_3008, FORD_FOCUS, SUZUKI_CROSSOVER,HONDA_CIVIC,TOYOTA_COROLLA,HYUNDAI_I30,HYUNDAI_IONIQ,
     AUTOMATIC, GASOLINE
 )
 
@@ -19,6 +19,12 @@ CONFIG = {
             PEUGEOT_3008,
             FORD_FOCUS,
             SUZUKI_CROSSOVER
+            ,HONDA_CIVIC,
+            TOYOTA_COROLLA,
+            HYUNDAI_I30,
+            HYUNDAI_IONIQ
+
+
         ],
         "transmission": [AUTOMATIC],
         "engine_type": [GASOLINE],
@@ -54,8 +60,8 @@ CONFIG = {
         }
     },
     "scraping_settings": {
-        "check_interval_minutes": 30,
-        "max_results_per_check": 20,
+        "check_interval_minutes": 15,
+        "max_results_per_check": 30,
         "timeout_minutes": 3
     }
 } 

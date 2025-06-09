@@ -8,7 +8,10 @@ Maps human-readable car preferences to yad2.co.il URL parameters
 PEUGEOT_3008 = "peugeot 3008"
 FORD_FOCUS = "ford focus"
 SUZUKI_CROSSOVER = "suzuki crossover"
-
+HONDA_CIVIC = "honda civic"
+TOYOTA_COROLLA = "toyota corolla"
+HYUNDAI_I30 = "hyundai i30"
+HYUNDAI_IONIQ = "hyundai ioniq"
 # Constants for engine type keys
 GASOLINE = "gasoline"
 DIESEL = "diesel"
@@ -26,6 +29,10 @@ CAR_MODELS = {
     PEUGEOT_3008: "10661",  
     FORD_FOCUS: "10598",
     SUZUKI_CROSSOVER: "10490",
+    HONDA_CIVIC: "10182",
+    TOYOTA_COROLLA: "10226",
+    HYUNDAI_I30: "10276",
+    HYUNDAI_IONIQ: "10279",
 }
 
 # Engine Types
