@@ -465,82 +465,110 @@ class Yad2CarScraper:
     def extract_car_data(self, car_element):
         """Extract car data from a listing element based on real yad2 HTML structure"""
         try:
-            # Extract model/title from heading
-            try:
+            # Helper function for retrying element extraction
+            def retry_extract(description, extraction_func, retries=3, delay=0.5):
+                for attempt in range(retries):
+                    try:
+                        time.sleep(delay)  # Small delay before each attempt
+                        result = extraction_func()
+                        if result:  # Only return if we got meaningful data
+                            return result
+                    except Exception as e:
+                        if attempt == retries - 1:  # Last attempt
+                            print(f"❌ Failed to extract {description} after {retries} attempts: {e}")
+                return None
+            
+            # Extract model/title from heading with retry
+            def extract_model():
                 title_elem = car_element.find_element(By.CSS_SELECTOR, '.feed-item-info_heading__k5pVC')
-                model = title_elem.text.strip()
-            except:
-                model = "Unknown Model"
+                text = title_elem.text.strip()
+                return text if text else None
             
-            # Extract marketing text (Active, mileage info, etc.)
-            try:
+            model = retry_extract("model", extract_model) or "Unknown Model"
+            
+            # Extract marketing text with retry
+            def extract_marketing():
                 marketing_elem = car_element.find_element(By.CSS_SELECTOR, '.feed-item-info_marketingText__eNE4R')
-                marketing_text = marketing_elem.text.strip()
-            except:
-                marketing_text = ""
+                text = marketing_elem.text.strip()
+                return text if text else None
             
-            # Extract year and hand info
-            try:
+            marketing_text = retry_extract("marketing text", extract_marketing) or ""
+            
+            # Extract year and hand info with retry
+            def extract_year_yad():
                 year_and_yad_elem = car_element.find_element(By.CSS_SELECTOR, '.feed-item-info_yearAndHandBox___JLbc')
-                year_and_yad_info = year_and_yad_elem.text.strip()
-                parts = year_and_yad_info.split('•')
-                parts = [part.strip() for part in parts]
-                year = parts[0] if len(parts) > 0 else ""
-                yad = parts[1] if len(parts) > 1 else ""
-            except:
-                year = ""
-                yad = ""
+                text = year_and_yad_elem.text.strip()
+                if text:
+                    parts = text.split('•')
+                    parts = [part.strip() for part in parts]
+                    return {
+                        'year': parts[0] if len(parts) > 0 else "",
+                        'yad': parts[1] if len(parts) > 1 else ""
+                    }
+                return None
             
-            # Extract price
-            try:
-                # Try to find price inside private-item-left-side first
+            year_yad_data = retry_extract("year/yad", extract_year_yad) or {}
+            year = year_yad_data.get('year', "")
+            yad = year_yad_data.get('yad', "")
+            
+            # Extract price with retry
+            def extract_price():
                 private_section = car_element.find_element(By.CSS_SELECTOR, '[data-testid="private-item-left-side"]')
                 price_elem = private_section.find_element(By.CSS_SELECTOR, '.price_price__xQt90')
-                price_text = price_elem.text.strip()
-            except:
-                price_text = "Price not found"
+                text = price_elem.text.strip()
+                return text if text else None
             
-            # Get link from the feed-item-base-link element
-            try:
-                # The car_element itself should be the link element with href
+            price_text = retry_extract("price", extract_price) or "Price not found"
+            
+            # Extract link with retry
+            def extract_link():
                 href = car_element.get_attribute('href')
                 if href:
                     # Build full URL from relative href
-                    # href format: "item/kdqeegdr?opened-from=feed&component-type=main_feed&spot=standard&location=1&pagination=1"
                     if href.startswith('item/'):
-                        link = f"https://www.yad2.co.il/{href}"
+                        return f"https://www.yad2.co.il/{href}"
                     elif href.startswith('http'):
-                        link = href  # Already full URL
+                        return href  # Already full URL
                     else:
-                        link = f"https://www.yad2.co.il/{href}"
-                else:
-                    link = ""
-            except:
-                link = ""
+                        return f"https://www.yad2.co.il/{href}"
+                return None
             
-            # Extract agency/seller info if available
-            try:
+            link = retry_extract("link", extract_link) or ""
+            
+            # Extract agency/seller info with retry
+            def extract_agency():
                 # Try first selector for commercial items
-                agency_elem = car_element.find_element(By.CSS_SELECTOR, '.commercial-item-left-side_agencyName__psfbp')
-                agency = agency_elem.text.strip()
-            except:
                 try:
-                    # Try second selector for ultra-plus items
-                    agency_elem = car_element.find_element(By.CSS_SELECTOR, '.ultra-plus-item-left-side_agencyName__0Aand')
-                    agency = agency_elem.text.strip()
+                    agency_elem = car_element.find_element(By.CSS_SELECTOR, '.commercial-item-left-side_agencyName__psfbp')
+                    text = agency_elem.text.strip()
+                    if text:
+                        return text
                 except:
-                    # If both selectors fail, it's likely a private person
-                    agency = "private person"
+                    pass
+                
+                # Try second selector for ultra-plus items
+                try:
+                    agency_elem = car_element.find_element(By.CSS_SELECTOR, '.ultra-plus-item-left-side_agencyName__0Aand')
+                    text = agency_elem.text.strip()
+                    if text:
+                        return text
+                except:
+                    pass
+                
+                return None
             
-            # Extract image URL
-            try:
+            agency = retry_extract("agency", extract_agency) or "private person"
+            
+            # Extract image URL with retry
+            def extract_image():
                 image_elem = car_element.find_element(By.CSS_SELECTOR, '[data-nagish="feed-item-main-image"]')
                 image_url = image_elem.get_attribute('src')
                 if not image_url:
                     # Fallback: try data-src attribute (lazy loading)
                     image_url = image_elem.get_attribute('data-src')
-            except:
-                image_url = ""
+                return image_url if image_url else None
+            
+            image_url = retry_extract("image", extract_image) or ""
             
             # Create comprehensive title
             title_parts = [model]
@@ -606,7 +634,7 @@ class Yad2CarScraper:
             driver.get(search_url)
             
             # Wait for page to load
-            time.sleep(3)
+            time.sleep(10)
             
             # Find car listings using the real yad2 selectors
             car_elements = driver.find_elements(By.CSS_SELECTOR, '[data-nagish="feed-item-base-link"]')
