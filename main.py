@@ -360,46 +360,30 @@ class Yad2CarScraper:
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("--disable-web-security")
-        chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
         # Add user agent to look more human
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
         
-        try:
-            # Try to use ChromeDriverManager with better error handling
-            driver_path = ChromeDriverManager().install()
-            print(f"🔧 ChromeDriver installed at: {driver_path}")
-            
-            # Verify the driver path exists and is executable
-            import os
-            if not os.path.exists(driver_path):
-                raise Exception(f"ChromeDriver not found at {driver_path}")
-                
-            service = Service(driver_path)
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            
-            return driver
-            
-        except Exception as e:
-            print(f"❌ ChromeDriverManager failed: {e}")
-            print("🔧 Trying alternative approach...")
-            
-            # Fallback: try to use system Chrome with manual path detection
-            try:
-                # For GitHub Actions Ubuntu
-                chrome_options.binary_location = "/usr/bin/google-chrome"
-                service = Service()  # Let it try to find chromedriver in PATH
-                driver = webdriver.Chrome(service=service, options=chrome_options)
-                driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-                print("✅ Using system Chrome successfully")
-                return driver
-            except Exception as fallback_error:
-                print(f"❌ Fallback also failed: {fallback_error}")
-                raise Exception("Failed to setup ChromeDriver with both approaches")
+        driver_path = ChromeDriverManager().install()
+        
+        # OS-agnostic fix for webdriver-manager pointing to wrong file
+        import os
+        if 'THIRD_PARTY_NOTICES' in os.path.basename(driver_path):
+            # Find the actual chromedriver binary in the same directory
+            driver_dir = os.path.dirname(driver_path)
+            for file in os.listdir(driver_dir):
+                if file == 'chromedriver' or file == 'chromedriver.exe':
+                    driver_path = os.path.join(driver_dir, file)
+                    print(f"🔧 Fixed driver path to: {driver_path}")
+                    break
+        
+        service = Service(driver_path)
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        
+        return driver
     
     def build_search_url(self):
         """Build Yad2 search URL based on configuration with proper parameter mapping"""
@@ -465,8 +449,8 @@ class Yad2CarScraper:
     def extract_car_data(self, car_element):
         """Extract car data from a listing element based on real yad2 HTML structure"""
         try:
-            # Helper function for retrying element extraction
-            def retry_extract(description, extraction_func, retries=3, delay=0.5):
+            # Helper function for retrying element extraction - minimal since content is pre-loaded
+            def retry_extract(description, extraction_func, retries=1, delay=0.1):
                 for attempt in range(retries):
                     try:
                         time.sleep(delay)  # Small delay before each attempt
@@ -643,11 +627,16 @@ class Yad2CarScraper:
             
             new_cars = []
             
-            for car_element in car_elements[:self.config['scraping_settings']['max_results_per_check']]:
+            for i, car_element in enumerate(car_elements[:self.config['scraping_settings']['max_results_per_check']]):
+                print(f"🔍 Processing car {i+1}/{min(len(car_elements), self.config['scraping_settings']['max_results_per_check'])}")
+                
                 car_data = self.extract_car_data(car_element)
                 
                 if not car_data:
+                    print(f"❌ Failed to extract data for car {i+1}")
                     continue
+                else:
+                    print(f"✅ Car {i+1}: {car_data.get('model', 'Unknown')[:30]} - {car_data.get('price', 'No price')}")
                 
                 # Check if we've seen this car before
                 if car_data['id'] in self.seen_cars['seen_car_ids']:

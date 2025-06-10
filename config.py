@@ -61,7 +61,7 @@ CONFIG = {
     },
     "scraping_settings": {
         "check_interval_minutes": 15,
-        "max_results_per_check": 30,
+        "max_results_per_check": 20,
         "timeout_minutes": 3
     }
 } 
