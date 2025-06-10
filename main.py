@@ -379,6 +379,15 @@ class Yad2CarScraper:
                     print(f"🔧 Fixed driver path to: {driver_path}")
                     break
         
+        # Ensure chromedriver has execute permissions (Linux/macOS)
+        import stat
+        try:
+            current_permissions = os.stat(driver_path).st_mode
+            os.chmod(driver_path, current_permissions | stat.S_IEXEC)
+            print(f"✅ Made chromedriver executable")
+        except Exception as e:
+            print(f"⚠️ Could not set execute permissions: {e}")
+        
         service = Service(driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
