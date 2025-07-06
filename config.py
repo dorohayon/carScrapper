@@ -5,31 +5,24 @@ Configuration file using constants from yad2_mappings
 
 import os
 from yad2_mappings import (
-    PEUGEOT_3008, FORD_FOCUS, SUZUKI_CROSSOVER,HONDA_CIVIC,TOYOTA_COROLLA,HYUNDAI_I30,HYUNDAI_IONIQ,
-    AUTOMATIC, GASOLINE
+    PEUGEOT_3008, FORD_FOCUS, SUZUKI_CROSSOVER, HONDA_CIVIC, TOYOTA_COROLLA, HYUNDAI_I30, HYUNDAI_IONIQ,
+    AUTOMATIC, GASOLINE, LEXUS_CT, LEXUS_IS
 )
 
 CONFIG = {
     "car_preferences": {
         "price_range": {
             "min": 30000,
-            "max": 65000
+            "max": 80000
         },
         "models": [
-            PEUGEOT_3008,
-            FORD_FOCUS,
-            SUZUKI_CROSSOVER
-            ,HONDA_CIVIC,
-            TOYOTA_COROLLA,
-            HYUNDAI_I30,
-            HYUNDAI_IONIQ
-
-
+        LEXUS_CT,
+        LEXUS_IS
         ],
         "transmission": [AUTOMATIC],
-        "engine_type": [GASOLINE],
+        # "engine_type": [GASOLINE],
         "year_range": {
-            "min": 2017,
+            "min": 2014,
             "max": 2025
         },
         "mileage": {

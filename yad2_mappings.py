@@ -12,6 +12,8 @@ HONDA_CIVIC = "honda civic"
 TOYOTA_COROLLA = "toyota corolla"
 HYUNDAI_I30 = "hyundai i30"
 HYUNDAI_IONIQ = "hyundai ioniq"
+LEXUS_IS = "lexus is300h"
+LEXUS_CT = "lexus ct200h"
 # Constants for engine type keys
 GASOLINE = "gasoline"
 DIESEL = "diesel"
@@ -33,6 +35,8 @@ CAR_MODELS = {
     TOYOTA_COROLLA: "10226",
     HYUNDAI_I30: "10276",
     HYUNDAI_IONIQ: "10279",
+    LEXUS_IS: "10321",
+    LEXUS_CT: "10317",
 }
 
 # Engine Types
